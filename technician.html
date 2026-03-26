@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مهام الفني - Royal Gas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        body { font-family: 'Cairo', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        .header { background: #0b4a99; color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .task-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-right: 6px solid #ce2029; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; }
+        .task-card h3 { color: #0b4a99; margin: 0 0 10px 0; font-size: 18px; }
+        .info-row { margin: 10px 0; font-size: 15px; color: #444; display: flex; align-items: center; }
+        .label { font-weight: bold; margin-left: 8px; color: #777; width: 80px; display: inline-block; }
+        .btn-call { background: #28a745; color: white; text-decoration: none; padding: 12px; border-radius: 8px; display: block; text-align: center; margin-top: 15px; font-weight: bold; }
+        .no-tasks { text-align: center; color: #888; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2 style="margin:0">قائمة المهام اليومية</h2>
+        <p id="techEmail" style="font-size: 13px; opacity: 0.8; margin-top: 5px;"></p>
+    </div>
+
+    <div id="tasksList">
+        <p style="text-align: center;">جاري تحميل المهام...</p>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZPQRSKGGINHkiReNu5Ly_gArUipQVYDs",
+        authDomain: "royal-gas-system.firebaseapp.com",
+        projectId: "royal-gas-system",
+        storageBucket: "royal-gas-system.firebasestorage.app",
+        messagingSenderId: "115245633400",
+        appId: "1:115245633400:web:747a95eb2774360dd4828d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // التأكد من أن المستخدم "فني" وعرض مهامه فقط
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('techEmail').innerText = "مرحباً: " + user.email;
+            
+            // جلب المهام التي تطابق إيميل الفني المسجل حالياً
+            const q = query(collection(db, "tasks"), where("techEmail", "==", user.email));
+            
+            onSnapshot(q, (snapshot) => {
+                let html = "";
+                if (snapshot.empty) {
+                    html = "<div class='no-tasks'>لا توجد مهام جديدة مسندة إليك اليوم.</div>";
+                } else {
+                    snapshot.forEach((doc) => {
+                        const t = doc.data();
+                        html += `
+                            <div class="task-card">
+                                <h3>👤 العميل: ${t.clientName}</h3>
+                                <div class="info-row"><span class="label">📍 العنوان:</span> ${t.address}</div>
+                                <div class="info-row"><span class="label">💬 الشكوى:</span> ${t.complaint}</div>
+                                <div class="info-row"><span class="label">📅 التاريخ:</span> ${t.date}</div>
+                                <a href="tel:${t.phone}" class="btn-call">اتصال بالعميل 📞</a>
+                            </div>`;
+                    });
+                }
+                document.getElementById('tasksList').innerHTML = html;
+            });
+        } else {
+            window.location.href = "index.html";
+        }
+    });
+</script>
+</body>
+</html>
