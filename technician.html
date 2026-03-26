@@ -12,7 +12,6 @@
         .header { background: var(--main); color: white; padding: 25px 20px; border-radius: 0 0 25px 25px; margin: -15px -15px 20px -15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .header h2 { margin: 0; font-weight: 800; font-size: 20px; }
         
-        /* كروت الإحصائيات */
         .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 15px; border-radius: 18px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-bottom: 4px solid #ddd; }
         .stat-card.pending { border-bottom-color: var(--accent); }
@@ -33,6 +32,7 @@
         
         .upload-input { display: none; }
         .loader { display: none; font-size: 14px; color: var(--main); text-align: center; font-weight: bold; margin: 10px 0; }
+        .gps-notice { font-size: 11px; color: #888; text-align: center; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -91,9 +91,9 @@
                     const id = snapshotDoc.id;
 
                     if (t.status === "تمت الزيارة") {
-                        doneNum++; // حساب المنجز فقط
+                        doneNum++;
                     } else {
-                        pendingNum++; // حساب المتبقي وبناء الكارت
+                        pendingNum++;
                         html += `
                             <div class="task-card">
                                 <b class="client-name">👤 ${t.clientName}</b>
@@ -115,12 +115,12 @@
                                     <button onclick="window.finishTask('${id}')" class="btn btn-done" id="btnDone_${id}" style="display:none;">
                                         إرسال الفاتورة وإغلاق الطلب ✅
                                     </button>
+                                    <p class="gps-notice" id="gps_${id}">سيتم تسجيل موقعك تلقائياً عند الإغلاق</p>
                                 </div>
                             </div>`;
                     }
                 });
 
-                // تحديث العدادات
                 document.getElementById('pendingCount').innerText = pendingNum;
                 document.getElementById('doneCount').innerText = doneNum;
 
@@ -168,20 +168,39 @@
         }
     };
 
+    // وظيفة الإنهاء مع التوثيق الجغرافي
     window.finishTask = async (taskId) => {
         const doneBtn = document.getElementById(`btnDone_${taskId}`);
         const imageUrl = doneBtn.getAttribute('data-url');
+        const gpsStatus = document.getElementById(`gps_${taskId}`);
 
-        try {
-            const taskRef = doc(db, "tasks", taskId);
-            await updateDoc(taskRef, {
-                status: "تمت الزيارة",
-                billPhoto: imageUrl,
-                finishTime: new Date().toLocaleString()
-            });
-            // ستختفي المهمة تلقائياً بفضل الـ onSnapshot
-        } catch (e) {
-            alert("خطأ في تحديث البيانات");
+        gpsStatus.innerText = "📍 جاري تحديد موقعك...";
+
+        // طلب إذن الموقع الجغرافي
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    const taskRef = doc(db, "tasks", taskId);
+                    await updateDoc(taskRef, {
+                        status: "تمت الزيارة",
+                        billPhoto: imageUrl,
+                        finishTime: new Date().toLocaleString(),
+                        location: {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        }
+                    });
+                    alert("تم إغلاق البلاغ بنجاح وتوثيق الموقع ✅");
+                } catch (e) {
+                    alert("خطأ في تحديث البيانات: " + e.message);
+                }
+            }, (error) => {
+                alert("يجب تفعيل خاصية الموقع (GPS) لإتمام إغلاق المهمة.");
+                gpsStatus.innerText = "❌ فشل تحديد الموقع";
+                gpsStatus.style.color = "red";
+            }, { enableHighAccuracy: true });
+        } else {
+            alert("متصفحك لا يدعم خاصية تحديد الموقع.");
         }
     };
 </script>
