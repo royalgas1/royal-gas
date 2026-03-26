@@ -10,30 +10,25 @@
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
         body { margin: 0; background: var(--bg); display: flex; }
 
-        /* القائمة الجانبية */
         .sidebar { width: 260px; height: 100vh; background: var(--r-blue); color: white; padding: 20px; position: fixed; }
         .sidebar h2 { font-size: 22px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
-        .nav-link { display: block; color: white; text-decoration: none; padding: 15px; border-radius: 10px; margin-bottom: 10px; transition: 0.3s; }
+        .nav-link { display: block; color: white; text-decoration: none; padding: 15px; border-radius: 10px; margin-bottom: 10px; transition: 0.3s; cursor: pointer; }
         .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(-5px); }
 
-        /* المحتوى الرئيسي */
-        .main-content { margin-right: 260px; padding: 40px; width: 100%; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .main-content { margin-right: 260px; padding: 40px; width: calc(100% - 260px); }
         
-        /* الكروت الإحصائية */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .stat-card { background: white; padding: 25px; border-radius: 20px; border: 1px solid #eee; transition: 0.4s; }
-        .stat-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-        .stat-card h3 { color: #888; font-size: 14px; margin: 0; }
-        .stat-card p { font-size: 32px; font-weight: 900; color: var(--r-blue); margin: 10px 0 0 0; }
+        /* تصميم نموذج إدخال البيانات */
+        .action-section { background: white; margin-top: 30px; padding: 30px; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--r-blue); }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        
+        .btn-submit { background: var(--r-blue); color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; transition: 0.3s; }
+        .btn-submit:hover { background: #083a7a; box-shadow: 0 5px 15px rgba(11,74,153,0.3); }
 
-        /* قسم الإجراءات */
-        .action-section { background: white; margin-top: 30px; padding: 30px; border-radius: 20px; border: 1px solid #eee; }
-        .btn-add { background: var(--r-blue); color: white; border: none; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: right; color: #888; padding: 15px; border-bottom: 2px solid #eee; }
-        td { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .stat-card { background: white; padding: 25px; border-radius: 20px; border: 1px solid #eee; }
+        .stat-card p { font-size: 32px; font-weight: 900; color: var(--r-blue); margin: 10px 0 0 0; }
     </style>
 </head>
 <body>
@@ -41,47 +36,118 @@
     <div class="sidebar">
         <h2>ROYAL GAS</h2>
         <nav>
-            <a href="#" class="nav-link">لوحة الإحصائيات</a>
-            <a href="#" class="nav-link">إدارة الفنيين</a>
-            <a href="#" class="nav-link">طلبات الصيانة</a>
-            <a href="#" class="nav-link" style="margin-top: 50px; background: var(--r-red);">تسجيل خروج</a>
+            <a onclick="showSection('stats')" class="nav-link">لوحة الإحصائيات</a>
+            <a onclick="showSection('addTask')" class="nav-link">إرسال طلب صيانة</a>
+            <a href="index.html" class="nav-link" style="margin-top: 50px; background: var(--r-red);">تسجيل خروج</a>
         </nav>
     </div>
 
     <div class="main-content">
-        <div class="header">
-            <h1 style="color: var(--r-blue); font-weight: 900;">لوحة المدير العام</h1>
-            <button class="btn-add">إضافة فني جديد +</button>
+        <div id="statsSection">
+            <h1 style="color: var(--r-blue); font-weight: 900;">إحصائيات النظام</h1>
+            <div class="stats-grid">
+                <div class="stat-card"><h3>إجمالي الفنيين</h3><p>3</p></div>
+                <div class="stat-card"><h3>عمليات اليوم</h3><p>0</p></div>
+                <div class="stat-card"><h3>أعطال معلقة</h3><p id="pendingCount" style="color: var(--r-red);">0</p></div>
+            </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card"><h3>إجمالي الفنيين</h3><p>12</p></div>
-            <div class="stat-card"><h3>عمليات اليوم</h3><p>45</p></div>
-            <div class="stat-card"><h3>أعطال معلقة</h3><p style="color: var(--r-red);">7</p></div>
-        </div>
+        <div id="addTaskSection" class="action-section">
+            <h2 style="color: var(--r-blue); border-bottom: 2px solid #eee; padding-bottom: 10px;">إدخال بيانات عميل صيانة جديد</h2>
+            
+            <div class="form-group">
+                <label>اسم العميل</label>
+                <input type="text" id="clientName" class="form-control" placeholder="أدخل اسم العميل بالكامل">
+            </div>
 
-        <div class="action-section">
-            <h2 style="font-size: 18px; margin-bottom: 20px;">قائمة الفنيين النشطين</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>اسم الفني</th>
-                        <th>البريد الإلكتروني</th>
-                        <th>الحالة</th>
-                        <th>الإجراء</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>أحمد محمد</td>
-                        <td>ahmed@royalgas.com</td>
-                        <td style="color: green;">نشط الآن</td>
-                        <td><button style="color: var(--r-red); background:none; border:none; cursor:pointer;">حذف</button></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="form-group">
+                <label>عنوان العميل</label>
+                <input type="text" id="address" class="form-control" placeholder="العنوان بالتفصيل">
+            </div>
+
+            <div class="form-group">
+                <label>رقم التليفون</label>
+                <input type="tel" id="phone" class="form-control" placeholder="01xxxxxxxxx">
+            </div>
+
+            <div class="form-group">
+                <label>شكوى العميل</label>
+                <textarea id="complaint" class="form-control" rows="3" placeholder="اكتب تفاصيل الشكوى هنا..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>تحديد الفني المسئول</label>
+                <select id="techSelect" class="form-control">
+                    <option value="tech1@royalgas.com">أحمد محمد (tech1)</option>
+                    <option value="tech2@royalgas.com">محمد علي (tech2)</option>
+                    <option value="tech3@royalgas.com">محمود حسن (tech3)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>التاريخ</label>
+                <input type="date" id="taskDate" class="form-control">
+            </div>
+
+            <button class="btn-submit" id="sendBtn">إرسال التكليف للفني المختار ✅</button>
         </div>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZPQRSKGGINHkiReNu5Ly_gArUipQVYDs",
+            authDomain: "royal-gas-system.firebaseapp.com",
+            projectId: "royal-gas-system",
+            storageBucket: "royal-gas-system.firebasestorage.app",
+            messagingSenderId: "115245633400",
+            appId: "1:115245633400:web:747a95eb2774360dd4828d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // وظيفة إرسال البيانات
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            const data = {
+                clientName: document.getElementById('clientName').value,
+                address: document.getElementById('address').value,
+                phone: document.getElementById('phone').value,
+                complaint: document.getElementById('complaint').value,
+                techEmail: document.getElementById('techSelect').value,
+                date: document.getElementById('taskDate').value,
+                status: "معلق"
+            };
+
+            if(!data.clientName || !data.phone || !data.date) {
+                return alert("برجاء إكمال البيانات الأساسية (الاسم، التليفون، التاريخ)");
+            }
+
+            try {
+                await addDoc(collection(db, "tasks"), data);
+                alert("تم إرسال التكليف للفني بنجاح");
+                // مسح الخانات بعد الإرسال
+                document.querySelectorAll('.form-control').forEach(input => input.value = "");
+            } catch (e) {
+                alert("خطأ في الاتصال بقاعدة البيانات");
+            }
+        });
+
+        // تنظيف الواجهة للتنقل
+        window.showSection = (section) => {
+            if(section === 'stats') {
+                document.getElementById('statsSection').style.display = 'block';
+                document.getElementById('addTaskSection').style.display = 'none';
+            } else {
+                document.getElementById('statsSection').style.display = 'none';
+                document.getElementById('addTaskSection').style.display = 'block';
+            }
+        }
+        
+        // ضبط التاريخ التلقائي لليوم
+        document.getElementById('taskDate').valueAsDate = new Date();
+    </script>
 </body>
 </html>
