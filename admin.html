@@ -17,18 +17,20 @@
 
         .main-content { margin-right: 260px; padding: 40px; width: calc(100% - 260px); }
         
-        /* تصميم نموذج إدخال البيانات */
         .action-section { background: white; margin-top: 30px; padding: 30px; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--r-blue); }
         .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         
         .btn-submit { background: var(--r-blue); color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; transition: 0.3s; }
-        .btn-submit:hover { background: #083a7a; box-shadow: 0 5px 15px rgba(11,74,153,0.3); }
+        .btn-submit.red { background: var(--r-red); }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
         .stat-card { background: white; padding: 25px; border-radius: 20px; border: 1px solid #eee; }
         .stat-card p { font-size: 32px; font-weight: 900; color: var(--r-blue); margin: 10px 0 0 0; }
+        
+        #addTechSection { display: none; } /* مخفي افتراضياً */
     </style>
 </head>
 <body>
@@ -36,9 +38,10 @@
     <div class="sidebar">
         <h2>ROYAL GAS</h2>
         <nav>
-            <a onclick="showSection('stats')" class="nav-link">لوحة الإحصائيات</a>
-            <a onclick="showSection('addTask')" class="nav-link">إرسال طلب صيانة</a>
-            <a href="index.html" class="nav-link" style="margin-top: 50px; background: var(--r-red);">تسجيل خروج</a>
+            <a onclick="showSection('stats')" class="nav-link">📊 الإحصائيات</a>
+            <a onclick="showSection('addTask')" class="nav-link">📝 إرسال طلب صيانة</a>
+            <a onclick="showSection('addTech')" class="nav-link">👷 إدارة الفنيين</a>
+            <a href="index.html" class="nav-link" style="margin-top: 50px; background: var(--r-red);">🚪 تسجيل خروج</a>
         </nav>
     </div>
 
@@ -46,56 +49,40 @@
         <div id="statsSection">
             <h1 style="color: var(--r-blue); font-weight: 900;">إحصائيات النظام</h1>
             <div class="stats-grid">
-                <div class="stat-card"><h3>إجمالي الفنيين</h3><p>3</p></div>
+                <div class="stat-card"><h3>إجمالي الفنيين</h3><p id="totalTechs">0</p></div>
                 <div class="stat-card"><h3>عمليات اليوم</h3><p>0</p></div>
                 <div class="stat-card"><h3>أعطال معلقة</h3><p id="pendingCount" style="color: var(--r-red);">0</p></div>
             </div>
         </div>
 
-        <div id="addTaskSection" class="action-section">
-            <h2 style="color: var(--r-blue); border-bottom: 2px solid #eee; padding-bottom: 10px;">إدخال بيانات عميل صيانة جديد</h2>
-            
-            <div class="form-group">
-                <label>اسم العميل</label>
-                <input type="text" id="clientName" class="form-control" placeholder="أدخل اسم العميل بالكامل">
-            </div>
-
-            <div class="form-group">
-                <label>عنوان العميل</label>
-                <input type="text" id="address" class="form-control" placeholder="العنوان بالتفصيل">
-            </div>
-
-            <div class="form-group">
-                <label>رقم التليفون</label>
-                <input type="tel" id="phone" class="form-control" placeholder="01xxxxxxxxx">
-            </div>
-
-            <div class="form-group">
-                <label>شكوى العميل</label>
-                <textarea id="complaint" class="form-control" rows="3" placeholder="اكتب تفاصيل الشكوى هنا..."></textarea>
-            </div>
-
+        <div id="addTaskSection" class="action-section" style="display:none;">
+            <h2 style="color: var(--r-blue);">إدخال بيانات عميل صيانة جديد</h2>
+            <div class="form-group"><label>اسم العميل</label><input type="text" id="clientName" class="form-control"></div>
+            <div class="form-group"><label>عنوان العميل</label><input type="text" id="address" class="form-control"></div>
+            <div class="form-group"><label>رقم التليفون</label><input type="tel" id="phone" class="form-control"></div>
+            <div class="form-group"><label>شكوى العميل</label><textarea id="complaint" class="form-control" rows="2"></textarea></div>
             <div class="form-group">
                 <label>تحديد الفني المسئول</label>
                 <select id="techSelect" class="form-control">
-                    <option value="tech1@royalgas.com">أحمد محمد (tech1)</option>
-                    <option value="tech2@royalgas.com">محمد علي (tech2)</option>
-                    <option value="tech3@royalgas.com">محمود حسن (tech3)</option>
+                    <option value="">جاري تحميل الفنيين...</option>
                 </select>
             </div>
+            <div class="form-group"><label>التاريخ</label><input type="date" id="taskDate" class="form-control"></div>
+            <button class="btn-submit" id="sendBtn">إرسال التكليف للفني ✅</button>
+        </div>
 
-            <div class="form-group">
-                <label>التاريخ</label>
-                <input type="date" id="taskDate" class="form-control">
-            </div>
-
-            <button class="btn-submit" id="sendBtn">إرسال التكليف للفني المختار ✅</button>
+        <div id="addTechSection" class="action-section">
+            <h2 style="color: var(--r-blue);">تسجيل فني جديد في النظام</h2>
+            <p style="font-size: 13px; color: #666;">* أضف بيانات الفني هنا ليظهر في قائمة التكليفات</p>
+            <div class="form-group"><label>اسم الفني</label><input type="text" id="newTechName" class="form-control" placeholder="مثلاً: أحمد محمد"></div>
+            <div class="form-group"><label>البريد الإلكتروني (المسجل في Firebase)</label><input type="email" id="newTechEmail" class="form-control" placeholder="tech@royalgas.com"></div>
+            <button class="btn-submit" id="saveTechBtn" style="background: #28a745;">حفظ الفني في القائمة 💾</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBZPQRSKGGINHkiReNu5Ly_gArUipQVYDs",
@@ -109,7 +96,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // وظيفة إرسال البيانات
+        // --- 1. وظيفة جلب الفنيين وتحديث القائمة المنسدلة ---
+        function listenToTechs() {
+            onSnapshot(collection(db, "technicians"), (snapshot) => {
+                const select = document.getElementById('techSelect');
+                select.innerHTML = '<option value="">-- اختر الفني المسئول --</option>';
+                document.getElementById('totalTechs').innerText = snapshot.size;
+                
+                snapshot.forEach((doc) => {
+                    const tech = doc.data();
+                    const opt = document.createElement('option');
+                    opt.value = tech.email;
+                    opt.text = tech.name;
+                    select.appendChild(opt);
+                });
+            });
+        }
+        listenToTechs();
+
+        // --- 2. وظيفة حفظ فني جديد ---
+        document.getElementById('saveTechBtn').addEventListener('click', async () => {
+            const name = document.getElementById('newTechName').value;
+            const email = document.getElementById('newTechEmail').value.toLowerCase().trim();
+
+            if(!name || !email) return alert("برجاء إدخال اسم وإيميل الفني");
+
+            try {
+                await addDoc(collection(db, "technicians"), { name, email });
+                alert("تمت إضافة الفني بنجاح!");
+                document.getElementById('newTechName').value = "";
+                document.getElementById('newTechEmail').value = "";
+                showSection('stats');
+            } catch (e) { alert("خطأ في الحفظ"); }
+        });
+
+        // --- 3. وظيفة إرسال تكليف صيانة ---
         document.getElementById('sendBtn').addEventListener('click', async () => {
             const data = {
                 clientName: document.getElementById('clientName').value,
@@ -121,32 +142,22 @@
                 status: "معلق"
             };
 
-            if(!data.clientName || !data.phone || !data.date) {
-                return alert("برجاء إكمال البيانات الأساسية (الاسم، التليفون، التاريخ)");
-            }
+            if(!data.techEmail) return alert("يجب اختيار فني مسئول");
 
             try {
                 await addDoc(collection(db, "tasks"), data);
-                alert("تم إرسال التكليف للفني بنجاح");
-                // مسح الخانات بعد الإرسال
-                document.querySelectorAll('.form-control').forEach(input => input.value = "");
-            } catch (e) {
-                alert("خطأ في الاتصال بقاعدة البيانات");
-            }
+                alert("تم إرسال التكليف بنجاح");
+                document.querySelectorAll('.form-control').forEach(i => i.value = "");
+                document.getElementById('taskDate').valueAsDate = new Date();
+            } catch (e) { alert("خطأ في الإرسال"); }
         });
 
-        // تنظيف الواجهة للتنقل
+        // التنقل بين الأقسام
         window.showSection = (section) => {
-            if(section === 'stats') {
-                document.getElementById('statsSection').style.display = 'block';
-                document.getElementById('addTaskSection').style.display = 'none';
-            } else {
-                document.getElementById('statsSection').style.display = 'none';
-                document.getElementById('addTaskSection').style.display = 'block';
-            }
+            document.getElementById('statsSection').style.display = section === 'stats' ? 'block' : 'none';
+            document.getElementById('addTaskSection').style.display = section === 'addTask' ? 'block' : 'none';
+            document.getElementById('addTechSection').style.display = section === 'addTech' ? 'block' : 'none';
         }
-        
-        // ضبط التاريخ التلقائي لليوم
         document.getElementById('taskDate').valueAsDate = new Date();
     </script>
 </body>
