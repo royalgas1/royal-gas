@@ -133,7 +133,7 @@
                 <table id="analysisTable">
                     <thead>
                         <tr>
-                            <th>تاريخ الزيارة</th><th>العميل</th><th>الفني</th><th>الحالة</th><th>ملاحظات التأجيل/الإلغاء</th>
+                            <th>تاريخ الزيارة الأصل</th><th>العميل</th><th>الفني</th><th>الحالة</th><th>ملاحظات / موعد التأجيل</th>
                         </tr>
                     </thead>
                     <tbody id="analysisTableBody"></tbody>
@@ -222,7 +222,7 @@
             runAnalysis(); 
         });
 
-        // نظام التحليل المحدث بناءً على طلبك
+        // نظام التحليل المحدث بناءً على طلبك ليبقى التاريخ الأصلي ثابتاً
         window.runAnalysis = () => {
             const month = document.getElementById('filterMonth').value;
             const day = document.getElementById('filterDay').value;
@@ -251,22 +251,21 @@
             filtered.forEach(f => {
                 const sClass = f.status === 'تمت الزيارة' ? 'badge-done' : (f.status === 'مؤجلة' ? 'badge-delayed' : (f.status === 'معلق' ? 'badge-pending' : 'badge-canceled'));
                 
-                // المتغيرات للتحكم في العرض المطلوب
-                let displayDate = f.date; // التاريخ الافتراضي
+                // التعديل المطلوب: التاريخ المعروض هو التاريخ الأصلي المسجل في البداية
+                let originalVisitDate = f.date; 
                 let statusNote = f.note || '-';
 
                 if (f.status === 'مؤجلة') {
-                    // في حال التأجيل: 
-                    // التاريخ يظل تاريخ الزيارة (date) 
-                    // الملاحظات تأخذ تاريخ التأجيل الجديد (newDate) المسجل من تطبيق الفني
-                    statusNote = f.newDate ? `📅 تأجلت إلى: <b>${f.newDate}</b>` : 'تأجلت (لم يحدد موعد)';
+                    // إذا تم التأجيل، نعرض التاريخ الجديد في خانة الملاحظات
+                    statusNote = f.newDate ? `<b style="color:var(--r-orange)">📅 تأجلت لموعد: ${f.newDate}</b>` : 'تأجلت (لم يحدد موعد)';
+                    if(f.note) statusNote += `<br><small>${f.note}</small>`;
                 } else if (f.status === 'ملغاة') {
-                    statusNote = '<span style="color:var(--r-red)">⚠️ تم الإلغاء بواسطة الفني</span>';
+                    statusNote = `<span style="color:var(--r-red)">⚠️ تم الإلغاء: ${f.note || 'بواسطة الفني'}</span>`;
                 }
 
                 tableBody.innerHTML += `
                     <tr>
-                        <td>${displayDate}</td>
+                        <td>${originalVisitDate}</td>
                         <td><b>${f.clientName}</b></td>
                         <td>${f.techEmail ? f.techEmail.split('@')[0] : '-'}</td>
                         <td><span class="badge ${sClass}">${f.status}</span></td>
@@ -317,6 +316,7 @@
                 date: document.getElementById('taskDate').value,
                 status: "معلق"
             };
+            if(!data.clientName || !data.techEmail || !data.date) return alert("برجاء ملء البيانات الأساسية");
             await addDoc(collection(db, "tasks"), data);
             alert("تم التكليف ✅");
             document.querySelectorAll('#addTaskSection .form-control').forEach(i => i.value = "");
