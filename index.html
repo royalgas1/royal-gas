@@ -119,24 +119,26 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 
                 if (email === "admin@royalgas.com") {
-                    // 1. إخفاء واجهة الدخول تماماً
+                    // --- إضافة نظام الأمان (بصمة الدخول للأدمن) ---
+                    localStorage.setItem("adminLoggedIn", "true");
+                    // ------------------------------------------
+                    
                     document.getElementById('authScreen').style.opacity = '0';
                     
                     setTimeout(() => {
                         document.getElementById('authScreen').style.display = 'none';
-                        
-                        // 2. إظهار شاشة الترحيب
                         const welcome = document.getElementById('welcomeOverlay');
                         welcome.style.display = 'flex';
                         setTimeout(() => welcome.style.opacity = '1', 50);
                         
-                        // 3. الانتظار ثانيتين للمدير ثم الانتقال
                         setTimeout(() => {
                             window.location.href = "admin.html";
                         }, 2500);
                     }, 500);
 
                 } else {
+                    // لو فني ممكن نضيف له برضه بصمة أمان خاصة به لو حابب تحمي صفحته
+                    localStorage.setItem("techLoggedIn", "true"); 
                     window.location.href = "technician.html";
                 }
 
