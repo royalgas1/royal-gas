@@ -137,13 +137,9 @@
     </div>
 
     <script type="module">
-        // ---------------------------------------------------------
-        // نظام الحماية المعدل (بمنع الخروج المفاجئ)
-        // ---------------------------------------------------------
         function checkAuth() {
             const status = localStorage.getItem("adminLoggedIn");
             if (status !== "true") {
-                // استنى 800 مللي ثانية عشان ندي فرصة لـ Firebase والصفحة السابقة
                 setTimeout(() => {
                     if (localStorage.getItem("adminLoggedIn") !== "true") {
                         window.location.replace("index.html");
@@ -159,7 +155,6 @@
                 window.location.replace("index.html");
             }
         };
-        // ---------------------------------------------------------
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -211,10 +206,25 @@
                 if(t.date === todayStr) todayTotal++;
                 if(t.status === "معلق") pending++;
                 if(t.status === "تمت الزيارة" && t.date === todayStr) completed++;
+                
                 if(t.status === "معلق" || t.date === todayStr || t.date < todayStr) {
                     const statusClass = t.status === 'معلق' ? 'badge-pending' : (t.status === 'تمت الزيارة' ? 'badge-done' : (t.status === 'مؤجلة' ? 'badge-delayed' : 'badge-canceled'));
                     const followUp = getFollowUpStatus(t);
-                    taskTable.innerHTML += `<tr><td>${t.clientName}</td><td>${t.techEmail ? t.techEmail.split('@')[0] : '..'}</td><td><span class="badge ${statusClass}">${t.status}</span></td><td>${followUp}</td><td>${t.location ? '📍 موقع' : 'N/A'}</td><td>${t.billPhoto ? '🖼️ عرض' : 'لا يوجد'}</td><td>${t.date}</td><td><button class="btn-delete" onclick="deleteTask('${t.id}')">حذف</button></td></tr>`;
+                    
+                    // تحويل اللوكيشن والصور لروابط قابلة للضغط
+                    const locLink = t.location ? `<a href="https://www.google.com/maps?q=${t.location}" target="_blank" class="view-link">📍 خريطة</a>` : 'N/A';
+                    const billLink = t.billPhoto ? `<a href="${t.billPhoto}" target="_blank" class="view-link">🖼️ عرض</a>` : 'لا يوجد';
+
+                    taskTable.innerHTML += `<tr>
+                        <td>${t.clientName}</td>
+                        <td>${t.techEmail ? t.techEmail.split('@')[0] : '..'}</td>
+                        <td><span class="badge ${statusClass}">${t.status}</span></td>
+                        <td>${followUp}</td>
+                        <td>${locLink}</td>
+                        <td>${billLink}</td>
+                        <td>${t.date}</td>
+                        <td><button class="btn-delete" onclick="deleteTask('${t.id}')">حذف</button></td>
+                    </tr>`;
                 }
             });
             document.getElementById('pendingCount').innerText = pending;
@@ -241,7 +251,19 @@
             tableBody.innerHTML = '';
             filtered.forEach(f => {
                 const sClass = f.status === 'تمت الزيارة' ? 'badge-done' : (f.status === 'مؤجلة' ? 'badge-delayed' : (f.status === 'معلق' ? 'badge-pending' : 'badge-canceled'));
-                tableBody.innerHTML += `<tr><td>${f.date}</td><td><b>${f.clientName}</b></td><td>${f.techEmail ? f.techEmail.split('@')[0] : '-'}</td><td><span class="badge ${sClass}">${f.status}</span></td><td>${f.location ? '📍 خريطة' : '-'}</td><td>${f.billPhoto ? '🖼️ فاتورة' : '-'}</td><td>${f.note || '-'}</td></tr>`;
+                
+                const locLink = f.location ? `<a href="https://www.google.com/maps?q=${f.location}" target="_blank" class="view-link">📍 خريطة</a>` : '-';
+                const billLink = f.billPhoto ? `<a href="${f.billPhoto}" target="_blank" class="view-link">🖼️ فاتورة</a>` : '-';
+
+                tableBody.innerHTML += `<tr>
+                    <td>${f.date}</td>
+                    <td><b>${f.clientName}</b></td>
+                    <td>${f.techEmail ? f.techEmail.split('@')[0] : '-'}</td>
+                    <td><span class="badge ${sClass}">${f.status}</span></td>
+                    <td>${locLink}</td>
+                    <td>${billLink}</td>
+                    <td>${f.note || '-'}</td>
+                </tr>`;
             });
         };
 
