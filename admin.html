@@ -42,7 +42,6 @@
         .badge-delayed { background: #fff9db; color: var(--r-orange); }
         .badge-canceled { background: #eee; color: #555; }
         
-        /* ألوان عمود المتابعة */
         .status-stable { color: var(--r-green); font-weight: bold; }
         .status-late { color: var(--r-red); font-weight: bold; animation: blink 1s infinite; }
         .status-missed { color: #555; font-weight: bold; background: #eee; padding: 2px 5px; border-radius: 4px; }
@@ -64,7 +63,7 @@
             <a onclick="showSection('addTask')" class="nav-link">📝 إرسال طلب صيانة</a>
             <a onclick="showSection('addTech')" class="nav-link">👷 إدارة الفنيين</a>
             <a onclick="showSection('analysis')" class="nav-link">📈 التحليل الشامل للسنة</a>
-            <a href="index.html" class="nav-link" style="margin-top: 50px; background: var(--r-red);">🚪 تسجيل خروج</a>
+            <a onclick="logout()" class="nav-link" style="margin-top: 50px; background: var(--r-red);">🚪 تسجيل خروج</a>
         </nav>
     </div>
 
@@ -95,62 +94,23 @@
             <h1 style="color: var(--r-blue); font-weight: 900;">التحليل الشامل والبحث السنوي</h1>
             
             <div class="filter-bar">
-                <div class="form-group">
-                    <label>الشهر</label>
-                    <select id="filterMonth" class="form-control" onchange="runAnalysis()">
-                        <option value="">كل الشهور</option>
-                        <option value="01">يناير</option><option value="02">فبراير</option><option value="03">مارس</option>
-                        <option value="04">أبريل</option><option value="05">مايو</option><option value="06">يونيو</option>
-                        <option value="07">يوليو</option><option value="08">أغسطس</option><option value="09">سبتمبر</option>
-                        <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>اليوم المحدد</label>
-                    <input type="number" id="filterDay" class="form-control" placeholder="مثلاً: 15" min="1" max="31" oninput="runAnalysis()">
-                </div>
-                <div class="form-group">
-                    <label>الحالة</label>
-                    <select id="filterStatus" class="form-control" onchange="runAnalysis()">
-                        <option value="">كل الحالات</option>
-                        <option value="تمت الزيارة">تمت الزيارة</option>
-                        <option value="مؤجلة">مؤجلة</option>
-                        <option value="ملغاة">ملغاة</option>
-                        <option value="معلق">معلق</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>الفني</label>
-                    <select id="filterTech" class="form-control" onchange="runAnalysis()">
-                        <option value="">كل الفنيين</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>تصدير</label>
-                    <button class="btn-excel" style="width:100%; height:45px" onclick="exportAnalysisExcel()">إكسيل 📗</button>
-                </div>
+                <div class="form-group"><label>الشهر</label><select id="filterMonth" class="form-control" onchange="runAnalysis()"><option value="">كل الشهور</option><option value="01">يناير</option><option value="02">فبراير</option><option value="03">مارس</option><option value="04">أبريل</option><option value="05">مايو</option><option value="06">يونيو</option><option value="07">يوليو</option><option value="08">أغسطس</option><option value="09">سبتمبر</option><option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option></select></div>
+                <div class="form-group"><label>اليوم المحدد</label><input type="number" id="filterDay" class="form-control" placeholder="مثلاً: 15" min="1" max="31" oninput="runAnalysis()"></div>
+                <div class="form-group"><label>الحالة</label><select id="filterStatus" class="form-control" onchange="runAnalysis()"><option value="">كل الحالات</option><option value="تمت الزيارة">تمت الزيارة</option><option value="مؤجلة">مؤجلة</option><option value="ملغاة">ملغاة</option><option value="معلق">معلق</option></select></div>
+                <div class="form-group"><label>الفني</label><select id="filterTech" class="form-control" onchange="runAnalysis()"><option value="">كل الفنيين</option></select></div>
+                <div class="form-group"><label>تصدير</label><button class="btn-excel" style="width:100%; height:45px" onclick="exportAnalysisExcel()">إكسيل 📗</button></div>
             </div>
 
             <div class="stats-grid">
                 <div class="stat-card"><h3>إجمالي البحث</h3><p id="anaTotal">0</p></div>
                 <div class="stat-card"><h3>تم التنفيذ</h3><p id="anaDone" style="color: var(--r-green);">0</p></div>
-                <div class="stat-card"><h3>تم تأجيلها</h3><p id="anaDelayed" style="color: var(--r-orange);">0</p></div>
+                <div class="stat-card)<h3>تم تأجيلها</h3><p id="anaDelayed" style="color: var(--r-orange);">0</p></div>
                 <div class="stat-card"><h3>ملغاة</h3><p id="anaCanceled" style="color: var(--r-red);">0</p></div>
             </div>
 
             <div class="action-section">
                 <table id="analysisTable">
-                    <thead>
-                        <tr>
-                            <th>التاريخ</th>
-                            <th>العميل</th>
-                            <th>الفني</th>
-                            <th>الحالة</th>
-                            <th>الموقع</th>
-                            <th>الفاتورة</th>
-                            <th>ملاحظات التأجيل</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>التاريخ</th><th>العميل</th><th>الفني</th><th>الحالة</th><th>الموقع</th><th>الفاتورة</th><th>ملاحظات التأجيل</th></tr></thead>
                     <tbody id="analysisTableBody"></tbody>
                 </table>
             </div>
@@ -177,6 +137,19 @@
     </div>
 
     <script type="module">
+        // ---------------------------------------------------------
+        // نظام الحماية: التحقق من تسجيل الدخول
+        if (localStorage.getItem("adminLoggedIn") !== "true") {
+            window.location.href = "index.html";
+        }
+
+        // دالة الخروج لمسح الرخصة من المتصفح
+        window.logout = () => {
+            localStorage.removeItem("adminLoggedIn");
+            window.location.href = "index.html";
+        };
+        // ---------------------------------------------------------
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -191,6 +164,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        
+        // ... باقي الكود الخاص بك يكمل هنا كما هو بدون تغيير ...
         let allTasks = []; 
 
         window.showSection = (section) => {
@@ -200,35 +175,16 @@
 
         window.deleteTask = async (id) => { if(confirm("حذف نهائي؟")) await deleteDoc(doc(db, "tasks", id)); };
 
-        // دالة حساب حالة المتابعة
         function getFollowUpStatus(task) {
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
             const taskDate = task.date;
-            
-            // إذا كانت ملغاة -> مستقر
             if (task.status === "ملغاة") return '<span class="status-stable">مستقر</span>';
-            
-            // إذا مر عليها يوم (تاريخ المهمة أصغر من تاريخ اليوم) ولم تكتمل بعد -> فائتة
-            if (taskDate < todayStr && task.status !== "تمت الزيارة") {
-                return '<span class="status-missed">فائتة</span>';
-            }
-
-            // منطق الساعة 3 مساءً (اليوم)
-            // نفترض أن المهمة في "اليوم الحالي"
+            if (taskDate < todayStr && task.status !== "تمت الزيارة") return '<span class="status-missed">فائتة</span>';
             const isToday = (taskDate === todayStr);
             const currentHour = now.getHours();
-
-            if (task.status === "تمت الزيارة") {
-                // إذا أُغلقت، نتحقق متى أُغلقت (نحتاج حقل completionTime، إذا لم يتوفر سنفترض وقت الإغلاق هو الآن عند التحديث)
-                // للتسهيل: إذا اكتملت اليوم، نتحقق من الساعة الحالية
-                return (currentHour < 15) ? '<span class="status-stable">مستقر</span>' : '<span class="status-late">متأخر</span>';
-            }
-
-            if (isToday) {
-                return (currentHour >= 15) ? '<span class="status-late">متأخر</span>' : '<span class="status-stable">مستقر</span>';
-            }
-
+            if (task.status === "تمت الزيارة") return (currentHour < 15) ? '<span class="status-stable">مستقر</span>' : '<span class="status-late">متأخر</span>';
+            if (isToday) return (currentHour >= 15) ? '<span class="status-late">متأخر</span>' : '<span class="status-stable">مستقر</span>';
             return '<span class="status-stable">مستقر</span>';
         }
 
@@ -238,77 +194,44 @@
             let pending = 0, completed = 0, todayTotal = 0;
             const todayStr = new Date().toISOString().split('T')[0];
             taskTable.innerHTML = '';
-
             snapshot.forEach((docSnap) => {
                 const t = docSnap.data();
                 t.id = docSnap.id;
                 allTasks.push(t);
-
                 if(t.date === todayStr) todayTotal++;
                 if(t.status === "معلق") pending++;
                 if(t.status === "تمت الزيارة" && t.date === todayStr) completed++;
-
                 if(t.status === "معلق" || t.date === todayStr || t.date < todayStr) {
-                    // عرض المهام المعلقة + مهام اليوم + المهام الفائتة في الجدول الرئيسي
                     const statusClass = t.status === 'معلق' ? 'badge-pending' : (t.status === 'تمت الزيارة' ? 'badge-done' : (t.status === 'مؤجلة' ? 'badge-delayed' : 'badge-canceled'));
-                    
                     const followUp = getFollowUpStatus(t);
-
-                    taskTable.innerHTML += `
-                        <tr>
-                            <td>${t.clientName}</td>
-                            <td>${t.techEmail ? t.techEmail.split('@')[0] : '..'}</td>
-                            <td><span class="badge ${statusClass}">${t.status}</span></td>
-                            <td>${followUp}</td>
-                            <td>${t.location ? `<a href="https://www.google.com/maps?q=${t.location.lat},${t.location.lng}" target="_blank" class="view-link">📍 الموقع</a>` : 'N/A'}</td>
-                            <td>${t.billPhoto ? `<a href="${t.billPhoto}" target="_blank" class="view-link">🖼️ عرض</a>` : 'لا يوجد'}</td>
-                            <td>${t.date}</td>
-                            <td><button class="btn-delete" onclick="deleteTask('${t.id}')">حذف</button></td>
-                        </tr>`;
+                    taskTable.innerHTML += `<tr><td>${t.clientName}</td><td>${t.techEmail ? t.techEmail.split('@')[0] : '..'}</td><td><span class="badge ${statusClass}">${t.status}</span></td><td>${followUp}</td><td>${t.location ? '📍 موقع' : 'N/A'}</td><td>${t.billPhoto ? '🖼️ عرض' : 'لا يوجد'}</td><td>${t.date}</td><td><button class="btn-delete" onclick="deleteTask('${t.id}')">حذف</button></td></tr>`;
                 }
             });
-
             document.getElementById('pendingCount').innerText = pending;
             document.getElementById('completedCount').innerText = completed;
             document.getElementById('todayTotal').innerText = todayTotal;
             runAnalysis(); 
         });
 
-        // دوال التحليل والإدارة تظل كما هي في كودك الأصلي
         window.runAnalysis = () => {
             const month = document.getElementById('filterMonth').value;
             const day = document.getElementById('filterDay').value;
             const status = document.getElementById('filterStatus').value;
             const tech = document.getElementById('filterTech').value;
             const tableBody = document.getElementById('analysisTableBody');
-            
             let filtered = allTasks.filter(t => {
                 if (!t.date) return false;
                 const parts = t.date.split('-');
-                return (month === '' || parts[1] === month) &&
-                       (day === '' || parseInt(parts[2]) === parseInt(day)) &&
-                       (status === '' || t.status === status) &&
-                       (tech === '' || t.techEmail === tech);
+                return (month === '' || parts[1] === month) && (day === '' || parseInt(parts[2]) === parseInt(day)) && (status === '' || t.status === status) && (tech === '' || t.techEmail === tech);
             });
-
             document.getElementById('anaTotal').innerText = filtered.length;
             document.getElementById('anaDone').innerText = filtered.filter(f => f.status === 'تمت الزيارة').length;
             document.getElementById('anaDelayed').innerText = filtered.filter(f => f.status === 'مؤجلة').length;
             document.getElementById('anaCanceled').innerText = filtered.filter(f => f.status === 'ملغاة').length;
-
             tableBody.innerHTML = '';
             filtered.forEach(f => {
                 const sClass = f.status === 'تمت الزيارة' ? 'badge-done' : (f.status === 'مؤجلة' ? 'badge-delayed' : (f.status === 'معلق' ? 'badge-pending' : 'badge-canceled'));
-                tableBody.innerHTML += `
-                    <tr>
-                        <td>${f.date}</td>
-                        <td><b>${f.clientName}</b></td>
-                        <td>${f.techEmail ? f.techEmail.split('@')[0] : '-'}</td>
-                        <td><span class="badge ${sClass}">${f.status}</span></td>
-                        <td>${f.location ? '📍 خريطة' : '-'}</td>
-                        <td>${f.billPhoto ? '🖼️ فاتورة' : '-'}</td>
-                        <td>${f.note || '-'}</td>
-                    </tr>`;
+                tableBody.innerHTML += `<tr><td>${f.date}</td><td><b>${f.clientName}</b></td><td>${f.techEmail ? f.techEmail.split('@')[0] : '-'}</td><td><span class="badge ${sClass}">${f.status}</span></td><td>${f.location ? '📍 خريطة' : '-'}</td><td>${f.billPhoto ? '🖼️ فاتورة' : '-'}</td><td>${f.note || '-'}</td></tr>`;
             });
         };
 
