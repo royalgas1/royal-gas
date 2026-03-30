@@ -3,56 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Royal Gas - Admin Panel</title>
+    <title>Royal Gas - Control Panel</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        :root { --r-blue: #0b4a99; --r-red: #ce2029; --r-green: #28a745; --r-orange: #ff9800; --bg: #f8f9fa; }
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-        body { margin: 0; background: var(--bg); display: flex; }
-
-        .sidebar { width: 260px; height: 100vh; background: var(--r-blue); color: white; padding: 20px; position: fixed; z-index: 100; }
-        .sidebar h2 { font-size: 22px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
-        .nav-link { display: block; color: white; text-decoration: none; padding: 15px; border-radius: 10px; margin-bottom: 10px; transition: 0.3s; cursor: pointer; }
-        .nav-link:hover { background: rgba(255,255,255,0.1); transform: translateX(-5px); }
-
-        .main-content { margin-right: 260px; padding: 40px; width: calc(100% - 260px); }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
         
-        .action-section { background: white; margin-top: 30px; padding: 30px; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--r-blue); }
-        .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        
-        .btn-submit { background: var(--r-blue); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; transition: 0.3s; }
-        .btn-delete { background: var(--r-red); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        .btn-excel { background: var(--r-green); color: white; border: none; padding: 7px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
+        :root {
+            --royal-blue: #0b4a99;
+            --royal-red: #ce2029;
+            --bg-body: #f4f7fa;
+            --card-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; font-size: 13px; }
-        th { background: #f4f7f9; color: var(--r-blue); }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { margin: 0; background: var(--bg-body); display: flex; color: #333; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.02); text-align: center; }
-        .stat-card h3 { font-size: 13px; color: #666; margin: 0; }
-        .stat-card p { font-size: 24px; font-weight: 900; color: var(--r-blue); margin: 10px 0 0 0; }
-        
-        .badge { padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; }
-        .badge-pending { background: #fff5f5; color: var(--r-red); }
-        .badge-done { background: #f0fff4; color: var(--r-green); }
-        .badge-delayed { background: #fff9db; color: var(--r-orange); }
-        .badge-canceled { background: #eee; color: #555; }
-        
-        .status-stable { color: var(--r-green); font-weight: bold; }
-        .status-late { color: var(--r-red); font-weight: bold; animation: blink 1s infinite; }
-        .status-missed { color: #555; font-weight: bold; background: #eee; padding: 2px 5px; border-radius: 4px; }
-        .status-finished { color: #888; font-weight: bold; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        /* Sidebar - التصميم الملكي */
+        .sidebar { 
+            width: 280px; height: 100vh; background: var(--royal-blue); color: white; 
+            position: fixed; z-index: 1000; box-shadow: 5px 0 20px rgba(0,0,0,0.15);
+            padding: 40px 20px; display: flex; flex-direction: column;
+        }
+        .sidebar h2 { font-size: 28px; text-align: center; font-weight: 900; margin-bottom: 50px; letter-spacing: 1px; border-bottom: 2px solid var(--royal-red); padding-bottom: 10px; }
+        .nav-link { 
+            display: flex; align-items: center; color: rgba(255,255,255,0.7); 
+            text-decoration: none; padding: 15px 20px; border-radius: 12px; 
+            margin-bottom: 10px; font-weight: 700; cursor: pointer;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(-10px); }
+        .nav-link.active { background: white; color: var(--royal-blue); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
-        #addTechSection, #addTaskSection, #analysisSection { display: none; }
-        .filter-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; background: #f0f4f8; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        /* Main Content Area */
+        .main-content { margin-right: 280px; padding: 40px; width: calc(100% - 280px); }
         
-        .view-link { text-decoration: none; color: var(--r-blue); font-weight: bold; border-bottom: 1px dashed; }
-        .view-link:hover { color: var(--r-red); }
+        /* Page Header Title */
+        .page-header { margin-bottom: 35px; border-right: 8px solid var(--royal-red); padding-right: 20px; }
+        .page-header h1 { font-size: 32px; font-weight: 900; color: var(--royal-blue); margin: 0; }
+        .page-header p { color: #777; margin: 5px 0 0; font-weight: 600; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { 
+            background: white; padding: 20px; border-radius: 20px; text-align: center;
+            box-shadow: var(--card-shadow); border: 1px solid rgba(0,0,0,0.02);
+        }
+        .stat-card:hover { transform: translateY(-5px); border-bottom: 4px solid var(--royal-blue); }
+        .stat-card h3 { font-size: 13px; color: #888; margin: 0; text-transform: uppercase; }
+        .stat-card p { font-size: 28px; font-weight: 900; color: var(--royal-blue); margin: 10px 0 0; }
+
+        /* Professional Table Design */
+        .table-card { background: white; border-radius: 20px; padding: 25px; box-shadow: var(--card-shadow); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f8fafc; padding: 18px 15px; text-align: right; color: var(--royal-blue); font-weight: 800; border-bottom: 2px solid #edf2f7; font-size: 14px; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; font-weight: 600; color: #444; }
+        tbody tr:hover { background: #f9fbff; }
+
+        /* Form Controls & Filter Bar */
+        .filter-bar { 
+            display: flex; flex-wrap: wrap; gap: 15px; background: white; padding: 20px; 
+            border-radius: 20px; margin-bottom: 25px; box-shadow: var(--card-shadow); align-items: flex-end;
+        }
+        .form-group { flex: 1; min-width: 150px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--royal-blue); font-size: 13px; }
+        .form-control { 
+            width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 12px; 
+            font-size: 14px; outline: none; background: #f8fafc;
+        }
+        .form-control:focus { border-color: var(--royal-blue); background: white; }
+
+        /* Buttons */
+        .btn-main { 
+            background: var(--royal-blue); color: white; border: none; padding: 12px 25px; 
+            border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 14px;
+        }
+        .btn-main:hover { background: #052a5a; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(11,74,153,0.3); }
+        .btn-red { background: var(--royal-red); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+
+        /* Badges */
+        .badge { padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 11px; text-align: center; display: inline-block; }
+        .bg-pending { background: #fff5f5; color: #c53030; }
+        .bg-done { background: #f0fff4; color: #276749; }
+        .bg-delay { background: #fffaf0; color: #9c4221; }
+
+        /* Icons Links */
+        .icon-btn { text-decoration: none; font-size: 18px; margin: 0 5px; cursor: pointer; }
+
+        #addTaskSection, #addTechSection, #analysisSection { display: none; }
     </style>
 </head>
 <body>
@@ -60,31 +96,37 @@
     <div class="sidebar">
         <h2>ROYAL GAS</h2>
         <nav>
-            <a onclick="showSection('stats')" class="nav-link">📊 لوحة الأداء اليومي</a>
-            <a onclick="showSection('addTask')" class="nav-link">📝 إرسال طلب صيانة</a>
-            <a onclick="showSection('addTech')" class="nav-link">👷 إدارة الفنيين</a>
-            <a onclick="showSection('analysis')" class="nav-link">📈 التحليل الشامل للسنة</a>
-            <a onclick="logout()" class="nav-link" style="margin-top: 50px; background: var(--r-red);">🚪 تسجيل خروج</a>
+            <div onclick="showSection('stats')" class="nav-link active" id="l-stats">📊 لوحة التحكم الرئيسية</div>
+            <div onclick="showSection('addTask')" class="nav-link" id="l-addTask">📝 تسجيل بلاغ جديد</div>
+            <div onclick="showSection('addTech')" class="nav-link" id="l-addTech">👷 إدارة شؤون الفنيين</div>
+            <div onclick="showSection('analysis')" class="nav-link" id="l-analysis">📈 التحليل والتقارير</div>
+            <div onclick="logout()" class="nav-link" style="margin-top: auto; background: rgba(255,255,255,0.1);">🚪 تسجيل الخروج</div>
         </nav>
     </div>
 
     <div class="main-content">
+        
         <div id="statsSection">
-            <h1 style="color: var(--r-blue); font-weight: 900; margin-bottom: 5px;">مراقبة الأداء اليومي</h1>
-            <div class="stats-grid">
-                <div class="stat-card"><h3>فنيين مسجلين</h3><p id="totalTechs">0</p></div>
-                <div class="stat-card"><h3>بلاغات اليوم</h3><p id="todayTotal">0</p></div>
-                <div class="stat-card"><h3>معلق (قيد الانتظار)</h3><p id="pendingCount" style="color: var(--r-red);">0</p></div>
-                <div class="stat-card"><h3>تم الانتهاء اليوم</h3><p id="completedCount" style="color: var(--r-green);">0</p></div>
+            <div class="page-header">
+                <h1>مراقبة الأداء اليومي</h1>
+                <p>إحصائيات مباشرة لعمليات الصيانة اليوم</p>
             </div>
 
-            <div class="action-section">
-                <h3 style="color: var(--r-blue);">📋 المهام الجارية (اليوم)</h3>
-                <table id="taskTable">
+            <div class="stats-grid">
+                <div class="stat-card"><h3>الفنيين المسجلين</h3><p id="totalTechs">0</p></div>
+                <div class="stat-card"><h3>بلاغات اليوم</h3><p id="todayTotal">0</p></div>
+                <div class="stat-card"><h3>قيد الانتظار</h3><p id="pendingCount" style="color: var(--royal-red);">0</p></div>
+                <div class="stat-card"><h3>تمت الزيارة</h3><p id="completedCount" style="color: #276749;">0</p></div>
+            </div>
+
+            <div class="table-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin:0; color: var(--royal-blue);">📋 المهام الجارية (اليوم)</h3>
+                    <input type="text" id="mainSearchInput" class="form-control" placeholder="🔍 بحث سريع عن عميل أو هاتف..." oninput="updateTaskTable()" style="width: 300px;">
+                </div>
+                <table>
                     <thead>
-                        <tr>
-                            <th>العميل</th><th>الفني</th><th>الحالة</th><th>متابعة التوقيت</th><th>الموقع</th><th>الفاتورة</th><th>التوقيت</th><th>إجراء</th>
-                        </tr>
+                        <tr><th>العميل</th><th>الفني</th><th>التاريخ</th><th>الحالة</th><th>توقيت الحالة</th><th>الموقع</th><th>الفاتورة</th><th>إجراء</th></tr>
                     </thead>
                     <tbody id="taskTableBody"></tbody>
                 </table>
@@ -92,73 +134,125 @@
         </div>
 
         <div id="analysisSection">
-            <h1 style="color: var(--r-blue); font-weight: 900;">التحليل الشامل والبحث السنوي</h1>
-            
-            <div class="filter-bar">
-                <div class="form-group"><label>الشهر</label><select id="filterMonth" class="form-control" onchange="runAnalysis()"><option value="">كل الشهور</option><option value="01">يناير</option><option value="02">فبراير</option><option value="03">مارس</option><option value="04">أبريل</option><option value="05">مايو</option><option value="06">يونيو</option><option value="07">يوليو</option><option value="08">أغسطس</option><option value="09">سبتمبر</option><option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option></select></div>
-                <div class="form-group"><label>اليوم المحدد</label><input type="number" id="filterDay" class="form-control" placeholder="مثلاً: 15" min="1" max="31" oninput="runAnalysis()"></div>
-                <div class="form-group"><label>الحالة</label><select id="filterStatus" class="form-control" onchange="runAnalysis()"><option value="">كل الحالات</option><option value="تمت الزيارة">تمت الزيارة</option><option value="مؤجلة">مؤجلة</option><option value="ملغاة">ملغاة</option><option value="معلق">معلق</option></select></div>
-                <div class="form-group"><label>الفني</label><select id="filterTech" class="form-control" onchange="runAnalysis()"><option value="">كل الفنيين</option></select></div>
-                <div class="form-group"><label>تصدير</label><button class="btn-excel" style="width:100%; height:45px" onclick="exportAnalysisExcel()">إكسيل 📗</button></div>
+            <div class="page-header">
+                <h1>التحليل والتقارير</h1>
+                <p>مراجعة أرشيف البيانات وتصدير التقارير</p>
             </div>
 
             <div class="stats-grid">
-                <div class="stat-card"><h3>إجمالي البحث</h3><p id="anaTotal">0</p></div>
-                <div class="stat-card"><h3>تم التنفيذ</h3><p id="anaDone" style="color: var(--r-green);">0</p></div>
-                <div class="stat-card"><h3>تم تأجيلها</h3><p id="anaDelayed" style="color: var(--r-orange);">0</p></div>
-                <div class="stat-card"><h3>ملغاة</h3><p id="anaCanceled" style="color: var(--r-red);">0</p></div>
+                <div class="stat-card"><h3>تم التنفيذ</h3><p id="analysisDoneCount" style="color: #276749;">0</p></div>
+                <div class="stat-card"><h3>تم تأجيلها</h3><p id="analysisDelayedCount" style="color: #9c4221;">0</p></div>
+                <div class="stat-card"><h3>ملغاة</h3><p id="analysisCancelledCount" style="color: var(--royal-red);">0</p></div>
+                <div class="stat-card"><h3>إجمالي العمليات</h3><p id="analysisTotalCount">0</p></div>
+                <div class="stat-card"><h3>نسبة الإنجاز</h3><p id="analysisSuccessRate">0%</p></div>
             </div>
 
-            <div class="action-section">
+            <div class="filter-bar">
+                <div class="form-group">
+                    <label>شهر السنة</label>
+                    <select id="fMonth" class="form-control" onchange="runAnalysis()">
+                        <option value="">كل الشهور</option>
+                        <option value="01">يناير</option><option value="02">فبراير</option><option value="03">مارس</option>
+                        <option value="04">أبريل</option><option value="05">مايو</option><option value="06">يونيو</option>
+                        <option value="07">يوليو</option><option value="08">أغسطس</option><option value="09">سبتمبر</option>
+                        <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>اليوم</label>
+                    <input type="number" id="fDay" class="form-control" placeholder="يوم" min="1" max="31" oninput="runAnalysis()">
+                </div>
+                <div class="form-group">
+                    <label>تصفية بالفني</label>
+                    <select id="fTech" class="form-control" onchange="runAnalysis()">
+                        <option value="">كل الفنيين</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>حالة الطلب</label>
+                    <select id="fStatus" class="form-control" onchange="runAnalysis()">
+                        <option value="">كل الحالات</option>
+                        <option value="تمت الزيارة">تمت الزيارة</option>
+                        <option value="معلق">معلق</option>
+                        <option value="مؤجلة">مؤجلة</option>
+                        <option value="ملغاة">ملغاة</option>
+                    </select>
+                </div>
+                <button class="btn-main" onclick="exportAnalysisExcel()" style="height: 48px;">تصدير Excel 📗</button>
+            </div>
+
+            <div class="table-card">
                 <table id="analysisTable">
-                    <thead><tr><th>التاريخ</th><th>العميل</th><th>الفني</th><th>الحالة</th><th>الموقع</th><th>الفاتورة</th><th>ملاحظات التأجيل</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th><th>اسم العميل</th><th>الفني</th><th>الحالة</th><th>الموقع</th><th>الفاتورة</th><th>ملاحظات</th>
+                        </tr>
+                    </thead>
                     <tbody id="analysisTableBody"></tbody>
                 </table>
             </div>
         </div>
 
-        <div id="addTaskSection" class="action-section">
-            <h2>إرسال طلب صيانة جديد</h2>
-            <div class="form-group"><label>اسم العميل</label><input type="text" id="clientName" class="form-control"></div>
-            <div class="form-group"><label>العنوان</label><input type="text" id="address" class="form-control"></div>
-            <div class="form-group"><label>التليفون</label><input type="tel" id="phone" class="form-control"></div>
-            <div class="form-group"><label>الشكوى</label><textarea id="complaint" class="form-control"></textarea></div>
-            <div class="form-group"><label>الفني المختص</label><select id="techSelect" class="form-control"></select></div>
-            <div class="form-group"><label>التاريخ</label><input type="date" id="taskDate" class="form-control"></div>
-            <button class="btn-submit" id="sendBtn">إرسال التكليف ✅</button>
+        <div id="addTaskSection">
+            <div class="page-header">
+                <h1>تسجيل بلاغ صيانة</h1>
+                <p>إرسال تكليف مهمة جديد للفني</p>
+            </div>
+            <div class="table-card" style="max-width: 800px; margin: auto;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group"><label>اسم العميل</label><input type="text" id="cName" class="form-control"></div>
+                    <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="cPhone" class="form-control"></div>
+                    <div class="form-group">
+                        <label>المحافظة</label>
+                        <select id="cGov" class="form-control">
+                            <option value="القاهرة">القاهرة</option><option value="الجيزة">الجيزة</option><option value="الإسكندرية">الإسكندرية</option>
+                            <option value="الدقهلية">الدقهلية</option><option value="البحر الأحمر">البحر الأحمر</option><option value="البحيرة">البحيرة</option>
+                            <option value="الفيوم">الفيوم</option><option value="الغربية">الغربية</option><option value="الإسماعيلية">الإسماعيلية</option>
+                            <option value="المنوفية">المنوفية</option><option value="المنيا">المنيا</option><option value="القليوبية">القليوبية</option>
+                            <option value="الوادي الجديد">الوادي الجديد</option><option value="السويس">السويس</option><option value="الشرقية">الشرقية</option>
+                            <option value="الأقصر">الأقصر</option><option value="أسوان">أسوان</option><option value="أسيوط">أسيوط</option>
+                            <option value="بني سويف">بني سويف</option><option value="بورسعيد">بورسعيد</option><option value="دمياط">دمياط</option>
+                            <option value="جنوب سيناء">جنوب سيناء</option><option value="كفر الشيخ">كفر الشيخ</option><option value="مطروح">مطروح</option>
+                            <option value="قنا">قنا</option><option value="شمال سيناء">شمال سيناء</option><option value="سوهاج">سوهاج</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>العنوان بالكامل</label><input type="text" id="cAddress" class="form-control"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>وصف المشكلة</label><textarea id="cNote" class="form-control" rows="3" placeholder="اكتب تفاصيل العطل هنا..."></textarea></div>
+                    
+                    <div class="form-group"><label>تحديد الفني</label><select id="techSelect" class="form-control"></select></div>
+                    <div class="form-group"><label>تاريخ الزيارة</label><input type="date" id="cDate" class="form-control"></div>
+                </div>
+                <button class="btn-main" onclick="sendTask()" style="width: 100%; margin-top: 30px; font-size: 16px;">تأكيد إرسال التكليف ✅</button>
+            </div>
         </div>
 
-        <div id="addTechSection" class="action-section">
-            <h2>إدارة طاقم الفنيين</h2>
-            <div class="form-group"><label>الاسم</label><input type="text" id="newTechName" class="form-control"></div>
-            <div class="form-group"><label>الإيميل</label><input type="email" id="newTechEmail" class="form-control"></div>
-            <button class="btn-submit" id="saveTechBtn" style="background: var(--r-green);">حفظ الفني 💾</button>
-            <table style="margin-top:20px"><thead><tr><th>الاسم</th><th>الإيميل</th><th>إجراء</th></tr></thead><tbody id="techTableBody"></tbody></table>
+        <div id="addTechSection">
+            <div class="page-header">
+                <h1>إدارة طاقم الفنيين</h1>
+                <p>إضافة أو حذف فنيين من النظام</p>
+            </div>
+            <div style="display: flex; gap: 20px;">
+                <div class="table-card" style="flex: 1;">
+                    <h3 style="color: var(--royal-blue); margin-top: 0;">➕ إضافة فني جديد</h3>
+                    <div class="form-group"><label>الاسم الكامل</label><input type="text" id="tName" class="form-control"></div><br>
+                    <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="tEmail" class="form-control"></div><br>
+                    <button class="btn-main" onclick="addTech()" style="width: 100%;">حفظ الفني 💾</button>
+                </div>
+                <div class="table-card" style="flex: 2;">
+                    <h3 style="color: var(--royal-blue); margin-top: 0;">👥 الفنيين المسجلين</h3>
+                    <table>
+                        <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>إجراء</th></tr></thead>
+                        <tbody id="techTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        function checkAuth() {
-            const status = localStorage.getItem("adminLoggedIn");
-            if (status !== "true") {
-                setTimeout(() => {
-                    if (localStorage.getItem("adminLoggedIn") !== "true") {
-                        window.location.replace("index.html");
-                    }
-                }, 800);
-            }
-        }
-        checkAuth();
-
-        window.logout = () => {
-            if(confirm("هل تريد تسجيل الخروج؟")) {
-                localStorage.removeItem("adminLoggedIn");
-                window.location.replace("index.html");
-            }
-        };
 
         const firebaseConfig = {
             apiKey: "AIzaSyDFpWeQWHeLnNIC-81UNEEVz_LCa8NMWIc",
@@ -171,172 +265,167 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        let allTasks = []; 
+        let allTasks = [];
+        let techMap = {};
 
-        window.showSection = (section) => {
-            const ids = ['statsSection', 'addTaskSection', 'addTechSection', 'analysisSection'];
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.style.display = id.startsWith(section) ? 'block' : 'none';
+        window.showSection = (name) => {
+            ['statsSection', 'addTaskSection', 'addTechSection', 'analysisSection'].forEach(id => {
+                document.getElementById(id).style.display = id.startsWith(name) ? 'block' : 'none';
             });
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('l-' + name).classList.add('active');
         };
 
-        window.deleteTask = async (id) => { if(confirm("حذف نهائي؟")) await deleteDoc(doc(db, "tasks", id)); };
+        onSnapshot(collection(db, "technicians"), (snap) => {
+            const sel = document.getElementById('techSelect');
+            const fTech = document.getElementById('fTech');
+            const tb = document.getElementById('techTableBody');
+            sel.innerHTML = '<option value="">-- اختر الفني --</option>';
+            fTech.innerHTML = '<option value="">كل الفنيين</option>';
+            tb.innerHTML = '';
+            techMap = {};
+            document.getElementById('totalTechs').innerText = snap.size;
+            snap.forEach(d => {
+                const t = d.data();
+                techMap[t.email] = t.name;
+                sel.innerHTML += `<option value="${t.email}">${t.name}</option>`;
+                fTech.innerHTML += `<option value="${t.email}">${t.name}</option>`;
+                tb.innerHTML += `<tr><td>${t.name}</td><td>${t.email}</td><td><button class="btn-red" onclick="window.delDoc('technicians','${d.id}')">حذف</button></td></tr>`;
+            });
+        });
 
-        function getFollowUpStatus(task) {
+        onSnapshot(collection(db, "tasks"), (snap) => {
+            allTasks = [];
+            snap.forEach(d => { const t = d.data(); t.id = d.id; allTasks.push(t); });
+            updateTaskTable();
+            runAnalysis();
+        });
+
+        window.updateTaskTable = () => {
+            const search = document.getElementById('mainSearchInput').value.toLowerCase();
+            const tbody = document.getElementById('taskTableBody');
             const now = new Date();
-            const todayStr = now.toISOString().split('T')[0];
-            const taskDate = task.date;
-
-            if (task.status === "تمت الزيارة" || task.status === "ملغاة") return '<span class="status-finished">منتهية</span>';
-            // ✅ التعديل 1: عرض تاريخ التأجيل الجديد
-            if (task.status === "مؤجلة") return '<span class="badge badge-delayed">مؤجلة لـ ' + task.date + '</span>';
-
-            if (taskDate < todayStr && task.status === "معلق") return '<span class="status-missed">فائتة</span>';
-
-            const isToday = (taskDate === todayStr);
+            const today = now.toISOString().split('T')[0];
             const currentHour = now.getHours();
 
-            if (isToday && task.status === "معلق") {
-                return (currentHour >= 15) ? '<span class="status-late">متأخر</span>' : '<span class="status-stable">مستقر</span>';
-            }
+            let p=0, c=0, tt=0; tbody.innerHTML = '';
 
-            return '<span class="status-stable">مستقر</span>';
-        }
+            allTasks.forEach(t => {
+                if(t.date === today) tt++;
+                if(t.status === "معلق") p++;
+                if(t.status === "تمت الزيارة" && t.date === today) c++;
 
-        onSnapshot(collection(db, "tasks"), (snapshot) => {
-            allTasks = [];
-            const taskTable = document.getElementById('taskTableBody');
-            let pending = 0, completed = 0, todayTotal = 0;
-            const todayStr = new Date().toISOString().split('T')[0];
-            taskTable.innerHTML = '';
-            
-            snapshot.forEach((docSnap) => {
-                const t = docSnap.data();
-                t.id = docSnap.id;
-                allTasks.push(t);
-                
-                if(t.date === todayStr) todayTotal++;
-                if(t.status === "معلق") pending++;
-                if(t.status === "تمت الزيارة" && t.date === todayStr) completed++;
-                
-                // ✅ التعديل 2: المؤجلة تظهر لو اتأجلت النهارده
-                if(t.date === todayStr || (t.status === "معلق" && t.date < todayStr) || (t.status === "مؤجلة" && t.createdDate === todayStr)) {
-                    const statusClass = t.status === 'معلق' ? 'badge-pending' : (t.status === 'تمت الزيارة' ? 'badge-done' : (t.status === 'مؤجلة' ? 'badge-delayed' : 'badge-canceled'));
-                    const followUp = getFollowUpStatus(t);
+                if((t.date === today || (t.status === "معلق" && t.date < today)) && 
+                   (t.clientName?.toLowerCase().includes(search) || t.phone?.includes(search))) {
                     
-                    const locLink = t.location ? `<a href="https://www.google.com/maps?q=${t.location}" target="_blank" class="view-link">📍 خريطة</a>` : 'N/A';
-                    const billLink = t.billPhoto ? `<a href="${t.billPhoto}" target="_blank" class="view-link">🖼️ عرض</a>` : 'لا يوجد';
+                    let timeStatus = "مستقرة";
+                    if(t.status === "تمت الزيارة") {
+                        timeStatus = "منتهية ✅";
+                    } else if(currentHour >= 15) {
+                        timeStatus = "متأخرة ⚠️";
+                    }
 
-                    taskTable.innerHTML += `<tr>
-                        <td>${t.clientName}</td>
-                        <td>${t.techEmail ? t.techEmail.split('@')[0] : '..'}</td>
-                        <td><span class="badge ${statusClass}">${t.status}</span></td>
-                        <td>${followUp}</td>
-                        <td>${locLink}</td>
-                        <td>${billLink}</td>
+                    const sClass = t.status==='معلق'?'bg-pending':(t.status==='تمت الزيارة'?'bg-done':'bg-delay');
+                    tbody.innerHTML += `<tr>
+                        <td><b>${t.clientName}</b><br><small>${t.phone || ''}</small></td>
+                        <td>${techMap[t.techEmail] || t.techEmail}</td>
                         <td>${t.date}</td>
-                        <td><button class="btn-delete" onclick="deleteTask('${t.id}')">حذف</button></td>
+                        <td><span class="badge ${sClass}">${t.status}</span></td>
+                        <td><b style="color: ${timeStatus.includes('متأخرة')?'red':'green'}">${timeStatus}</b></td>
+                        <td>${t.location ? `<a href="https://www.google.com/maps?q=${t.location}" target="_blank" class="icon-btn">📍</a>` : '-'}</td>
+                        <td>${t.billPhoto ? `<a href="${t.billPhoto}" target="_blank" class="icon-btn">🖼️</a>` : '-'}</td>
+                        <td><button class="btn-red" onclick="window.delDoc('tasks','${t.id}')">🗑️</button></td>
                     </tr>`;
                 }
             });
-            document.getElementById('pendingCount').innerText = pending;
-            document.getElementById('completedCount').innerText = completed;
-            document.getElementById('todayTotal').innerText = todayTotal;
-            runAnalysis(); 
-        });
+            document.getElementById('pendingCount').innerText = p;
+            document.getElementById('completedCount').innerText = c;
+            document.getElementById('todayTotal').innerText = tt;
+        };
 
         window.runAnalysis = () => {
-            const month = document.getElementById('filterMonth').value;
-            const day = document.getElementById('filterDay').value;
-            const status = document.getElementById('filterStatus').value;
-            const tech = document.getElementById('filterTech').value;
-            const tableBody = document.getElementById('analysisTableBody');
+            const m = document.getElementById('fMonth').value;
+            const d = document.getElementById('fDay').value;
+            const t = document.getElementById('fTech').value;
+            const s = document.getElementById('fStatus').value;
+            const tbody = document.getElementById('analysisTableBody');
+            tbody.innerHTML = '';
             
-            let filtered = allTasks.filter(t => {
-                if (!t.date) return false;
-                const parts = t.date.split('-');
-                return (month === '' || parts[1] === month) && (day === '' || parseInt(parts[2]) === parseInt(day)) && (status === '' || t.status === status) && (tech === '' || t.techEmail === tech);
+            let filtered = allTasks.filter(item => {
+                const dateParts = item.date?.split('-') || [];
+                return (m==='' || dateParts[1]===m) && 
+                       (d==='' || parseInt(dateParts[2])===parseInt(d)) &&
+                       (t==='' || item.techEmail===t) && 
+                       (s==='' || item.status===s);
             });
 
-            document.getElementById('anaTotal').innerText = filtered.length;
-            document.getElementById('anaDone').innerText = filtered.filter(f => f.status === 'تمت الزيارة').length;
-            document.getElementById('anaDelayed').innerText = filtered.filter(f => f.status === 'مؤجلة').length;
-            document.getElementById('anaCanceled').innerText = filtered.filter(f => f.status === 'ملغاة').length;
-            
-            tableBody.innerHTML = '';
-            filtered.forEach(f => {
-                const sClass = f.status === 'تمت الزيارة' ? 'badge-done' : (f.status === 'مؤجلة' ? 'badge-delayed' : (f.status === 'معلق' ? 'badge-pending' : 'badge-canceled'));
-                const locLink = f.location ? `<a href="https://www.google.com/maps?q=${f.location}" target="_blank" class="view-link">📍 خريطة</a>` : '-';
-                const billLink = f.billPhoto ? `<a href="${f.billPhoto}" target="_blank" class="view-link">🖼️ فاتورة</a>` : '-';
-
-                tableBody.innerHTML += `<tr>
-                    <td>${f.date}</td>
-                    <td><b>${f.clientName}</b></td>
-                    <td>${f.techEmail ? f.techEmail.split('@')[0] : '-'}</td>
-                    <td><span class="badge ${sClass}">${f.status}</span></td>
-                    <td>${locLink}</td>
-                    <td>${billLink}</td>
-                    <td>${f.note || '-'}</td>
+            filtered.forEach(item => {
+                const sClass = item.status==='معلق'?'bg-pending':(item.status==='تمت الزيارة'?'bg-done':'bg-delay');
+                tbody.innerHTML += `<tr>
+                    <td>${item.date}</td>
+                    <td><b>${item.clientName}</b></td>
+                    <td>${techMap[item.techEmail] || item.techEmail}</td>
+                    <td><span class="badge ${sClass}">${item.status}</span></td>
+                    <td>${item.location ? `<a href="https://www.google.com/maps?q=${item.location}" target="_blank">📍 عرض</a>` : '-'}</td>
+                    <td>${item.billPhoto ? `<a href="${item.billPhoto}" target="_blank">🖼️ صورة</a>` : '-'}</td>
+                    <td>${item.description || item.note || '-'}</td>
                 </tr>`;
             });
+
+            document.getElementById('analysisTotalCount').innerText = filtered.length;
+            let doneCount = filtered.filter(x => x.status === "تمت الزيارة").length;
+            let delayedCount = filtered.filter(x => x.status === "مؤجلة").length;
+            let cancelledCount = filtered.filter(x => x.status === "ملغاة").length;
+
+            document.getElementById('analysisDoneCount').innerText = doneCount;
+            document.getElementById('analysisDelayedCount').innerText = delayedCount;
+            document.getElementById('analysisCancelledCount').innerText = cancelledCount;
+
+            let rate = filtered.length > 0 ? Math.round((doneCount / filtered.length) * 100) : 0;
+            document.getElementById('analysisSuccessRate').innerText = rate + "%";
+        };
+
+        window.sendTask = async () => {
+            const data = {
+                clientName: document.getElementById('cName').value,
+                phone: document.getElementById('cPhone').value,
+                gov: document.getElementById('cGov').value,
+                address: document.getElementById('cAddress').value,
+                description: document.getElementById('cNote').value,
+                techEmail: document.getElementById('techSelect').value,
+                date: document.getElementById('cDate').value,
+                status: "معلق"
+            };
+            if(!data.clientName || !data.techEmail) return alert("برجاء إدخال اسم العميل والفني");
+            await addDoc(collection(db, "tasks"), data);
+            alert("تم إرسال التكليف بنجاح ✅");
+            
+            document.getElementById('cName').value=''; document.getElementById('cPhone').value='';
+            document.getElementById('cAddress').value=''; document.getElementById('cNote').value='';
+            showSection('stats');
+        };
+
+        window.addTech = async () => {
+            const name = document.getElementById('tName').value;
+            const email = document.getElementById('tEmail').value;
+            if(name && email) await addDoc(collection(db, "technicians"), {name, email});
+            document.getElementById('tName').value = ''; document.getElementById('tEmail').value = '';
+        };
+
+        window.delDoc = async (col, id) => {
+            if(confirm("هل أنت متأكد من الحذف؟")) await deleteDoc(doc(db, col, id));
         };
 
         window.exportAnalysisExcel = () => {
-            const table = document.getElementById("analysisTable");
-            const ws = XLSX.utils.table_to_sheet(table);
+            const ws = XLSX.utils.table_to_sheet(document.getElementById("analysisTable"));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "التقرير");
-            XLSX.writeFile(wb, `RoyalGas_Report.xlsx`);
+            XLSX.writeFile(wb, "Royal_Gas_Report.xlsx");
         };
 
-        onSnapshot(collection(db, "technicians"), (snapshot) => {
-            const selects = [document.getElementById('techSelect'), document.getElementById('filterTech')];
-            const techTable = document.getElementById('techTableBody');
-            selects.forEach(s => { if(s) s.innerHTML = '<option value="">-- الكل --</option>'; });
-            if(techTable) techTable.innerHTML = '';
-            document.getElementById('totalTechs').innerText = snapshot.size;
-            snapshot.forEach((sDoc) => {
-                const tech = sDoc.data();
-                selects.forEach(s => {
-                    if(s) {
-                        const opt = document.createElement('option');
-                        opt.value = tech.email; opt.text = tech.name;
-                        s.appendChild(opt);
-                    }
-                });
-                if(techTable) techTable.innerHTML += `<tr><td>${tech.name}</td><td>${tech.email}</td><td><button class="btn-delete" onclick="window.deleteTech('${sDoc.id}')">حذف</button></td></tr>`;
-            });
-        });
-
-        document.getElementById('saveTechBtn').addEventListener('click', async () => {
-            const name = document.getElementById('newTechName').value;
-            const email = document.getElementById('newTechEmail').value;
-            if(name && email) await addDoc(collection(db, "technicians"), { name, email });
-            document.getElementById('newTechName').value = ''; document.getElementById('newTechEmail').value = '';
-        });
-
-        document.getElementById('sendBtn').addEventListener('click', async () => {
-            const data = {
-                clientName: document.getElementById('clientName').value,
-                address: document.getElementById('address').value,
-                phone: document.getElementById('phone').value,
-                complaint: document.getElementById('complaint').value,
-                techEmail: document.getElementById('techSelect').value,
-                date: document.getElementById('taskDate').value,
-                status: "معلق"
-            };
-            if(!data.clientName || !data.techEmail || !data.date) return alert("برجاء ملء البيانات");
-            await addDoc(collection(db, "tasks"), data);
-            alert("تم التكليف ✅");
-            document.getElementById('clientName').value = '';
-            document.getElementById('address').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('complaint').value = '';
-        });
-
-        document.getElementById('taskDate').valueAsDate = new Date();
+        window.logout = () => { if(confirm("هل تريد تسجيل الخروج؟")) window.location.replace("index.html"); };
+        
+        document.getElementById('cDate').valueAsDate = new Date();
     </script>
 </body>
 </html>
