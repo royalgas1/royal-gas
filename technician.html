@@ -80,14 +80,12 @@
         .info-item b { min-width: 90px; color: #555; font-weight: 700; }
         .info-item span { color: #333; font-weight: 600; flex: 1; }
 
-        /* Badge for Location */
         .gov-badge {
             background: #edf2f7; color: var(--royal-blue);
             padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 12px;
             display: inline-block; margin-bottom: 10px;
         }
 
-        /* Buttons Area */
         .actions-area { margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
         .btn { 
             display: flex; align-items: center; justify-content: center; 
@@ -159,8 +157,10 @@
     const db = getFirestore(app);
     const IMGBB_API_KEY = "621693c6848341977008ebc613225c19";
 
+    // --- التأكد من الدخول ---
     onAuthStateChanged(auth, (user) => {
-        if (user) {
+        // لو مفيش مستخدم في الـ Auth أو مفيش بصمة في الذاكرة، نرجعه للدخول
+        if (user && localStorage.getItem("techLoggedIn") === "true") {
             document.getElementById('techEmail').innerText = "الفني: " + user.email;
             const q = query(collection(db, "tasks"), where("techEmail", "==", user.email));
             
@@ -227,7 +227,6 @@
         }
     });
 
-    // الدوال الوظيفية (نفس منطق الكود السابق مع تحسين بسيط)
     window.toggleDelayBox = (id) => {
         const box = document.getElementById(`delayBox_${id}`);
         box.style.display = box.style.display === "block" ? "none" : "block";
@@ -237,7 +236,6 @@
         const newDate = document.getElementById(`newDate_${id}`).value;
         if (!newDate) return alert("برجاء اختيار التاريخ");
         try {
-            const today = new Date().toISOString().split('T')[0];
             await updateDoc(doc(db, "tasks", id), {
                 status: "مؤجلة",
                 date: newDate,
@@ -313,8 +311,16 @@
         }
     };
 
+    // --- تعديل وظيفة الخروج ---
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        signOut(auth).then(() => window.location.href = "index.html");
+        if(confirm("هل تريد تسجيل الخروج؟")) {
+            signOut(auth).then(() => {
+                // مسح البصمة من الذاكرة عشان ما يدخلش لوحده تاني
+                localStorage.removeItem("techLoggedIn");
+                localStorage.removeItem("adminLoggedIn");
+                window.location.href = "index.html";
+            });
+        }
     });
 </script>
 </body>
