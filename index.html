@@ -107,15 +107,20 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // --- وظيفة فحص الدخول المسبق المعدلة ---
-        function checkAutoLogin() {
-            // لو الرابط فيه logout امسح الذاكرة فوراً
-            if (window.location.search.includes('logout')) {
-                localStorage.removeItem("adminLoggedIn");
-                localStorage.removeItem("techLoggedIn");
-                return false;
+        // --- 1. وظيفة التنظيف الفوري (تنفذ قبل أي شيء) ---
+        function clearSessionIfLoggedOut() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('logout') === 'true') {
+                localStorage.clear(); // مسح الذاكرة بالكامل
+                // تنظيف الرابط عشان ميفضلش يمسح عند الريفرش
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return true;
             }
+            return false;
+        }
 
+        // --- 2. وظيفة فحص الدخول المسبق ---
+        function checkAutoLogin() {
             const isAdmin = localStorage.getItem("adminLoggedIn");
             const isTech = localStorage.getItem("techLoggedIn");
 
@@ -129,6 +134,7 @@
             return false;
         }
 
+        // --- 3. معالج تسجيل الدخول ---
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
@@ -154,7 +160,7 @@
                         
                         setTimeout(() => {
                             window.location.replace("admin.html");
-                        }, 2000);
+                        }, 1500);
                     }, 500);
 
                 } else {
@@ -166,15 +172,21 @@
                 console.error(error);
                 btn.innerText = "دخول النظام";
                 btn.disabled = false;
-                alert("فشل الدخول: تأكد من الحساب");
+                alert("فشل الدخول: تأكد من البيانات");
             }
         });
 
+        // --- 4. تشغيل النظام عند تحميل الصفحة ---
         window.onload = () => {
-            // تنفيذ الفحص فوراً
-            if (checkAutoLogin()) return;
+            // أول خطوة: هل المستخدم طلب تسجيل خروج؟
+            const justLoggedOut = clearSessionIfLoggedOut();
 
-            // إذا لم يوجد دخول مسبق، اعرض الافتتاحية
+            // ثاني خطوة: لو مش تسجيل خروج، هل ليه دخول قديم؟
+            if (!justLoggedOut) {
+                if (checkAutoLogin()) return;
+            }
+
+            // ثالث خطوة: إظهار الافتتاحية ثم واجهة الدخول
             setTimeout(() => {
                 document.getElementById('splash').style.opacity = '0';
                 setTimeout(() => {
@@ -183,7 +195,7 @@
                     authDiv.style.display = 'flex';
                     setTimeout(() => authDiv.style.opacity = '1', 50);
                 }, 800);
-            }, 2500);
+            }, 2000);
         };
     </script>
 </body>
